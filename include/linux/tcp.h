@@ -266,7 +266,8 @@ struct tcp_sock {
 		syn_ect_snt:2,	/* AccECN ECT memory, only */
 		syn_ect_rcv:2;	/* ... needed durign 3WHS + first seqno */
 	u8	accecn_fail_mode:4,	/* AccECN failure handling */
-		saw_accecn_opt:2;	/* An AccECN option was seen */
+		saw_accecn_opt:2,	/* An AccECN option was seen */
+		first_data_ack:1;	/* Check for first data ack */
 	u32	chrono_start;	/* Start time in jiffies of a TCP chrono */
 	u32	chrono_stat[3];	/* Time in jiffies for chrono_stat stats */
 	u8	chrono_type:2,	/* current chronograph type */
