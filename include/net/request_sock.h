@@ -62,7 +62,8 @@ struct request_sock {
 	u16				mss;
 	u8				num_retrans; /* number of retransmits */
 	u8				syncookie:1; /* syncookie: encode tcpopts in timestamp */
-	u8				num_timeout:7; /* number of timeouts */
+	u8				num_timeout:7, /* number of timeouts */
+					is_rtx:1;
 	u32				ts_recent;
 	struct timer_list		rsk_timer;
 	const struct request_sock_ops	*rsk_ops;
@@ -107,6 +108,7 @@ reqsk_alloc(const struct request_sock_ops *ops, struct sock *sk_listener,
 	req->saved_syn = NULL;
 	req->timeout = 0;
 	req->num_timeout = 0;
+	req->is_rtx = 0;
 	req->num_retrans = 0;
 	req->sk = NULL;
 	refcount_set(&req->rsk_refcnt, 0);
