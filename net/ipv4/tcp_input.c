@@ -3983,7 +3983,6 @@ static int tcp_ack(struct sock *sk, const struct sk_buff *skb, int flag)
 	 * with widely-deployed TCP implementations that do this.
 	 */
 	tcp_ecn_accept_cwr(sk, skb);
-	tcp_in_ack_event(sk, flag);
 
 	/* We passed data and got it acked, remove any soft error
 	 * log. Something worked...
@@ -3993,6 +3992,7 @@ static int tcp_ack(struct sock *sk, const struct sk_buff *skb, int flag)
 	tp->rcv_tstamp = tcp_jiffies32;
 	if (!prior_packets)
 		goto no_queue;
+	tcp_in_ack_event(sk, flag);
 
 	/* See if we can take anything off of the retransmit queue. */
 	flag |= tcp_clean_rtx_queue(sk, skb, prior_fack, prior_snd_una,
@@ -4031,6 +4031,7 @@ static int tcp_ack(struct sock *sk, const struct sk_buff *skb, int flag)
 	return 1;
 
 no_queue:
+	tcp_in_ack_event(sk, flag);
 	/* If data was DSACKed, see if we can undo a cwnd reduction. */
 	if (flag & FLAG_DSACKING_ACK) {
 		tcp_fastretrans_alert(sk, prior_snd_una, num_dupack, &flag,
