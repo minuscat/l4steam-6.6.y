@@ -145,8 +145,8 @@ __bpf_kfunc static void dctcp_update_alpha(struct sock *sk, u32 flags)
 			 */
 			if (delivered_ce > 0)
 				ce_ratio = (delivered_ce << TCP_PLB_SCALE) / delivered;
-			tcp_plb_update_state(sk, &ca->plb, (int)ce_ratio);
-			tcp_plb_check_rehash(sk, &ca->plb);
+			//tcp_plb_update_state(sk, &ca->plb, (int)ce_ratio);
+			//tcp_plb_check_rehash(sk, &ca->plb);
 		}
 
 		/* alpha = (1 - g) * alpha + g * F */
