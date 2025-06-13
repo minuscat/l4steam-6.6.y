@@ -3334,6 +3334,25 @@ static void tcp_ack_tstamp(struct sock *sk, struct sk_buff *skb,
 	}
 }
 
+static void tcp_in_ack_event(struct sock *sk, int flag)
+{
+	const struct inet_connection_sock *icsk = inet_csk(sk);
+
+	if (icsk->icsk_ca_ops->in_ack_event) {
+		u32 ack_ev_flags = 0;
+
+		if (flag & FLAG_WIN_UPDATE)
+			ack_ev_flags |= CA_ACK_WIN_UPDATE;
+		if (flag & FLAG_SLOWPATH) {
+			ack_ev_flags |= CA_ACK_SLOWPATH;
+			if (flag & FLAG_ECE)
+				ack_ev_flags |= CA_ACK_ECE;
+		}
+
+		icsk->icsk_ca_ops->in_ack_event(sk, ack_ev_flags);
+	}
+}
+
 /* Remove acknowledged frames from the retransmission queue. If our packet
  * is before the ack sequence we can discard it as it's confirmed to have
  * arrived at the other end.
@@ -3823,25 +3842,6 @@ static void tcp_process_tlp_ack(struct sock *sk, u32 ack, int flag)
 			     FLAG_NOT_DUP | FLAG_DATA_SACKED))) {
 		/* Pure dupack: original and TLP probe arrived; no loss */
 		tp->tlp_high_seq = 0;
-	}
-}
-
-static void tcp_in_ack_event(struct sock *sk, int flag)
-{
-	const struct inet_connection_sock *icsk = inet_csk(sk);
-
-	if (icsk->icsk_ca_ops->in_ack_event) {
-		u32 ack_ev_flags = 0;
-
-		if (flag & FLAG_WIN_UPDATE)
-			ack_ev_flags |= CA_ACK_WIN_UPDATE;
-		if (flag & FLAG_SLOWPATH) {
-			ack_ev_flags |= CA_ACK_SLOWPATH;
-			if (flag & FLAG_ECE)
-				ack_ev_flags |= CA_ACK_ECE;
-		}
-
-		icsk->icsk_ca_ops->in_ack_event(sk, ack_ev_flags);
 	}
 }
 
