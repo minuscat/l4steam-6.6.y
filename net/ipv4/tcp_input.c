@@ -3340,7 +3340,7 @@ static void tcp_ack_tstamp(struct sock *sk, struct sk_buff *skb,
  */
 static int tcp_clean_rtx_queue(struct sock *sk, const struct sk_buff *ack_skb,
 			       u32 prior_fack, u32 prior_snd_una,
-			       struct tcp_sacktag_state *sack, bool ece_ack)
+			       struct tcp_sacktag_state *sack, bool ece_ack, int inflag)
 {
 	const struct inet_connection_sock *icsk = inet_csk(sk);
 	u64 first_ackt, last_ackt;
@@ -3436,6 +3436,8 @@ static int tcp_clean_rtx_queue(struct sock *sk, const struct sk_buff *ack_skb,
 		tcp_highest_sack_replace(sk, skb, next);
 		tcp_rtx_queue_unlink_and_free(skb, sk);
 	}
+
+	tcp_in_ack_event(sk, inflag);
 
 	if (!skb)
 		tcp_chrono_stop(sk, TCP_CHRONO_BUSY);
@@ -3995,9 +3997,7 @@ static int tcp_ack(struct sock *sk, const struct sk_buff *skb, int flag)
 
 	/* See if we can take anything off of the retransmit queue. */
 	flag |= tcp_clean_rtx_queue(sk, skb, prior_fack, prior_snd_una,
-				    &sack_state, flag & FLAG_ECE);
-
-	tcp_in_ack_event(sk, flag);
+				    &sack_state, flag & FLAG_ECE, flag);
 
 	tcp_rack_update_reo_wnd(sk, &rs);
 
