@@ -3992,11 +3992,12 @@ static int tcp_ack(struct sock *sk, const struct sk_buff *skb, int flag)
 	tp->rcv_tstamp = tcp_jiffies32;
 	if (!prior_packets)
 		goto no_queue;
-	tcp_in_ack_event(sk, flag);
 
 	/* See if we can take anything off of the retransmit queue. */
 	flag |= tcp_clean_rtx_queue(sk, skb, prior_fack, prior_snd_una,
 				    &sack_state, flag & FLAG_ECE);
+
+	tcp_in_ack_event(sk, flag);
 
 	tcp_rack_update_reo_wnd(sk, &rs);
 
