@@ -3355,6 +3355,7 @@ static int tcp_clean_rtx_queue(struct sock *sk, const struct sk_buff *ack_skb,
 	u32 pkts_acked = 0;
 	bool rtt_update;
 	int flag = 0;
+	int oneoff = 0;
 
 	first_ackt = 0;
 
@@ -3397,6 +3398,10 @@ static int tcp_clean_rtx_queue(struct sock *sk, const struct sk_buff *ack_skb,
 		if (sacked & TCPCB_SACKED_ACKED) {
 			tp->sacked_out -= acked_pcount;
 		} else if (tcp_is_sack(tp)) {
+			if (oneoff == 0) {
+				oneoff = 1;
+				tcp_in_ack_event(sk, inflag);
+			}
 			tcp_count_delivered(tp, acked_pcount, ece_ack);
 			if (!tcp_skb_spurious_retrans(tp, skb))
 				tcp_rack_advance(tp, sacked, scb->end_seq,
@@ -3436,8 +3441,6 @@ static int tcp_clean_rtx_queue(struct sock *sk, const struct sk_buff *ack_skb,
 		tcp_highest_sack_replace(sk, skb, next);
 		tcp_rtx_queue_unlink_and_free(skb, sk);
 	}
-
-	tcp_in_ack_event(sk, inflag);
 
 	if (!skb)
 		tcp_chrono_stop(sk, TCP_CHRONO_BUSY);
