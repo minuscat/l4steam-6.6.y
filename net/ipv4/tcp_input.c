@@ -3417,11 +3417,11 @@ static int tcp_clean_rtx_queue(struct sock *sk, const struct sk_buff *ack_skb,
 		if (sacked & TCPCB_SACKED_ACKED) {
 			tp->sacked_out -= acked_pcount;
 		} else if (tcp_is_sack(tp)) {
+			tcp_count_delivered(tp, acked_pcount, ece_ack);
 			if (oneoff == 0) {
 				oneoff = 1;
 				tcp_in_ack_event(sk, inflag);
 			}
-			tcp_count_delivered(tp, acked_pcount, ece_ack);
 			if (!tcp_skb_spurious_retrans(tp, skb))
 				tcp_rack_advance(tp, sacked, scb->end_seq,
 						 tcp_skb_timestamp_us(skb));
