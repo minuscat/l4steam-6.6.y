@@ -936,6 +936,9 @@ static int dualpi2_init(struct Qdisc *sch, struct nlattr *opt,
 	struct dualpi2_sched_data *q = qdisc_priv(sch);
 	int err;
 
+	hrtimer_init(&q->pi2_timer, CLOCK_MONOTONIC, HRTIMER_MODE_ABS_PINNED_SOFT);
+	q->pi2_timer.function = dualpi2_timer;
+
 	q->l_queue = qdisc_create_dflt(sch->dev_queue, &pfifo_qdisc_ops,
 				       TC_H_MAKE(sch->handle, 1), extack);
 	if (!q->l_queue)
@@ -947,8 +950,6 @@ static int dualpi2_init(struct Qdisc *sch, struct nlattr *opt,
 
 	q->sch = sch;
 	dualpi2_reset_default(sch);
-	hrtimer_init(&q->pi2_timer, CLOCK_MONOTONIC, HRTIMER_MODE_ABS_PINNED_SOFT);
-	q->pi2_timer.function = dualpi2_timer;
 
 	if (opt && nla_len(opt)) {
 		err = dualpi2_change(sch, opt, extack);
